@@ -193,3 +193,44 @@ sacarPrimerElemento (_:xs) = xs
 -- Si no es malvado y la reparación es difícil, pierde todas sus herramientas buenas.
 -- Si no es malvado ni es difícil la reparación, sólo se olvida la primera de sus herramientas.
 
+-- 7) Nintendo, pese a ser una empresa de consolas y juegos, gana millones de dólares con su red de plomeros. 
+-- Cada plomero realiza varias reparaciones en un día. Necesitamos saber cómo afecta a un plomero una jornada de trabajo. 
+-- Bajan línea desde Nintendo que no usemos recursividad.
+
+realizarJornadaDeTrabajo :: [Reparacion] -> Plomero -> Plomero
+realizarJornadaDeTrabajo reparaciones plomero = foldr hacerReparacion plomero reparaciones
+
+-- 8) Nintendo beneficia a sus plomeros según ciertos criterios, es por eso que necesita saber, dado un conjunto de reparaciones
+-- a realizar en una jornada laboral, cuál de todos sus empleados es:
+
+type Criterio =  Plomero -> Number
+
+elEmpleadoMas :: Criterio -> [Reparacion] -> [Plomero] -> Plomero
+elEmpleadoMas criterio reparaciones = foldr1 (elMejorDeLosDosSegun criterio) . map (realizarJornadaDeTrabajo reparaciones)
+-- 1ero. Obtengo una lista de los plomeros luego de realizar una jornada laboral cada uno (aplico la jornada a cada plomero)
+-- 2dos. Realizo una reduccion para obtener de esa lista el mejor empleado segun un criterio dado, la semilla que utilizo
+-- es el primer empleado de la lista 
+
+-- Para comparar y quedarme con el mejor plomero según un criterio
+elMejorDeLosDosSegun :: Criterio -> Plomero -> Plomero -> Plomero
+elMejorDeLosDosSegun criterio plomero1 plomero2
+    | criterio plomero1 > criterio plomero2 = plomero1
+    | otherwise                             = plomero2
+
+-- CRITERIOS
+
+-- a) El empleado más reparador: El plomero que más reparaciones tiene en su historial una vez realizada su jornada laboral.
+
+reparador :: Criterio
+reparador = length . reparaciones
+
+-- b) El empleado más adinerado: El plomero que más dinero tiene encima una vez realizada su jornada laboral.
+
+adinerado :: Criterio
+adinerado = dinero
+
+-- c) El empleado que más invirtió: El plomero que más plata invertida tiene entre las herramientas que le quedaron una vez
+-- realizada su jornada laboral.
+
+inversor :: Criterio
+inversor = sum . map precio . herramientas
